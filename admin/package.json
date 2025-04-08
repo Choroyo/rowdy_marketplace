@@ -1,11 +1,32 @@
 {
-	"dependencies": {
-		"cors": "2.8.5",
-		"dotenv": "16.4.7",
-		"express": "5.1.0",
-		"stripe": "18.0.0"
-	},
-	"devDependencies": {
-		"nodemon": "3.1.9"
-	}
+  "name": "admin",
+  "version": "1.0.0",
+  "description": "Admin Data Backup For UTSA Rowdy Marketplace",
+  "main": "index.mjs",
+  "type": "module",
+  "engines": {
+    "nodemon": "22.x"
+  },
+  "scripts": {
+    "start": "nodemon index.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.7.1",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+<<<<<<< HEAD:Rowdy-Marketplace/admin/package.json
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+=======
+    "express": "^5.1.0",
+    "nodemon": "^3.1.9",
+    "stripe": "^18.0.0"
+>>>>>>> 9ee50f9d (Updated the UI):Rowdy-Marketplace-inner/admin/package.json
+  }
 }

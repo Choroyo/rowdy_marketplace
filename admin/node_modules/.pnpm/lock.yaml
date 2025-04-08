@@ -9,21 +9,20 @@ importers:
   .:
     dependencies:
       cors:
-        specifier: 2.8.5
+        specifier: ^2.8.5
         version: 2.8.5
       dotenv:
-        specifier: 16.4.7
+        specifier: ^16.4.7
         version: 16.4.7
       express:
-        specifier: 5.1.0
+        specifier: ^5.1.0
         version: 5.1.0
-      stripe:
-        specifier: 18.0.0
-        version: 18.0.0
-    devDependencies:
       nodemon:
-        specifier: 3.1.9
+        specifier: ^3.1.9
         version: 3.1.9
+      stripe:
+        specifier: ^18.0.0
+        version: 18.0.0
 
 packages:
 
