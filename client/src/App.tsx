@@ -12,11 +12,11 @@ function App() {
     <main>
       {/* <BannerCategories /> */}
       <HomeBanner />
-      <Highlights />  {/* Corrected spelling here */}
-      <Categories />
+      <Highlights />  
+      {/* <Categories /> */}
       <ProductList />
-      <DiscountedBanner />
-      <Blog />
+      {/* <DiscountedBanner /> */}
+      {/* <Blog /> */}
     </main>
   );
 }
