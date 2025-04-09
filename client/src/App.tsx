@@ -1,3 +1,4 @@
+// src/App.tsx
 import "react-multi-carousel/lib/styles.css";
 import BannerCategories from "./ui/BannerCategories";
 import HomeBanner from "./ui/HomeBanner";

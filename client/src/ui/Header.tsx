@@ -36,7 +36,7 @@ const navigationItems = [
 
 const Header = () => {
   const [searchText, setSearchText] = useState("");
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<CategoryProps[]>([]);
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<ProductProps[]>([]);
   const { cartProduct, favoriteProduct, currentUser } = store();
@@ -45,7 +45,9 @@ const Header = () => {
     const fetchData = async () => {
       try {
         const data = await getData(`${config?.baseUrl}/products`);
-        setProducts(data);
+        if (Array.isArray(data)) {
+          setProducts(data as ProductProps[]);
+        }
       } catch (error) {
         console.error("Error fetching data", error);
       }
@@ -57,7 +59,9 @@ const Header = () => {
     const fetchCategories = async () => {
       try {
         const data = await getData(`${config?.baseUrl}/categories`);
-        setCategories(data);
+        if (Array.isArray(data)) {
+          setCategories(data as unknown as CategoryProps[]);
+        }
       } catch (error) {
         console.error("Error fetching categories", error);
       }

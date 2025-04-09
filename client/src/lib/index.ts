@@ -1,18 +1,20 @@
+// src/lib/index.ts
+import { getAllProducts, getProductById } from './firebaseServices';
+
 export const getData = async (endpoint: string) => {
   try {
-    const response = await fetch(endpoint, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (!response.ok) {
-      throw new Error("Data fetching Error" + response?.statusText);
+    // Extract product ID if present in the endpoint
+    if (endpoint.includes('/products/') && endpoint.split('/').pop() !== '') {
+      const id = endpoint.split('/').pop();
+      if (id) {
+        return await getProductById(id);
+      }
     }
-    const data = await response.json();
-    return data;
+    
+    // If no specific product ID, return all products
+    return await getAllProducts();
   } catch (error) {
-    console.log("Error while fetching data", error);
+    console.error("Error fetching data:", error);
     throw error;
   }
 };
