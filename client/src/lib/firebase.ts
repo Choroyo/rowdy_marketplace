@@ -1,4 +1,23 @@
 // src/lib/firebase.ts
+
+// Database Schema
+
+// ProductID
+// name (string):
+// price (number):
+// description (string): 
+// images (array): 
+// category (string): 
+// createdBy (string): 
+// createdAt (timestamp): 
+// status (string): 
+
+// UserID
+// name (string): 
+// email (string): 
+// role (string): 
+// products (array): 
+
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';

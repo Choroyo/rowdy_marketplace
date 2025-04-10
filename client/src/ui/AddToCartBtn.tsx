@@ -4,7 +4,7 @@ import { store } from "../lib/store";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
-import PriceTag from "../ui/PriceTag";
+import FormattedPrice from "../ui/FormattedPrice";
 
 const AddToCartBtn = ({
   className,
@@ -40,16 +40,13 @@ const AddToCartBtn = ({
   };
 
   const handleDeleteProduct = () => {
-    if (existingProduct) {
-      if (existingProduct?.quantity > 1) {
-        decreaseQuantity(existingProduct?._id);
-        toast.success(
-          `${product?.name.substring(0, 10)} decreased successfully`
-        );
-      } else {
-        toast.error("You can not decrease less than 1");
-      }
+    if (existingProduct?.quantity && existingProduct.quantity > 1) {
+      decreaseQuantity(existingProduct._id as string);
+      toast.success(
+        `${product?.name.substring(0, 10)} decreased successfully`
+      );
     } else {
+      toast.error("You can not decrease less than 1");
     }
   };
 
@@ -58,34 +55,21 @@ const AddToCartBtn = ({
     className
   );
 
-  const getRegularPrice = () => {
-    if (existingProduct) {
-      if (product) {
-        return product?.regularPrice * existingProduct?.quantity;
-      }
-    } else {
-      return product?.regularPrice;
+  const getPrice = () => {
+    const quantity = existingProduct?.quantity || 1;
+    if (existingProduct && product?.price) {
+      return product.price * quantity;
     }
-  };
-
-  const getDiscountedPrice = () => {
-    if (existingProduct) {
-      if (product) {
-        return product?.discountedPrice * product?.quantity;
-      }
-    } else {
-      return product?.discountedPrice;
-    }
+    return product?.price || 0;
   };
 
   return (
     <>
       {showPrice && (
-        <div>
-          <PriceTag
-            regularPrice={getRegularPrice()}
-            discountedPrice={getDiscountedPrice()}
-          />
+        <div className="flex items-center gap-2">
+          <p className="font-bold text-skyText">
+            <FormattedPrice amount={getPrice()} />
+          </p>
         </div>
       )}
       {existingProduct ? (
@@ -97,7 +81,7 @@ const AddToCartBtn = ({
             <FaMinus />
           </button>
           <p className="text-base font-semibold w-10 text-center">
-            {existingProduct?.quantity}
+            {existingProduct?.quantity || 1}
           </p>
           <button
             onClick={handleAddToCart}
