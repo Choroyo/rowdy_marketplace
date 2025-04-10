@@ -5,6 +5,7 @@ import cors from "cors";
 import { fileURLToPath } from "url";
 import path from "path";
 import { readdirSync } from "fs";
+import "dotenv/config"
 
 dotenv.config();
 

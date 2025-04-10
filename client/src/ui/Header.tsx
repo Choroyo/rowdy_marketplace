@@ -146,16 +146,52 @@ const Header = () => {
           </div>
         </div>
       </div>
-
       {/* Navigation Bar */}
       <nav style={{ backgroundColor: utsaColors.navy, height: "45px" }}>
-        <div className="max-w-screen-xl mx-auto">
-          <div className="flex justify-center">
+        <div className="max-w-screen-xl mx-auto flex items-center h-full px-4 justify-between">
+          {/* Select Category */}
+          <Menu>
+            <MenuButton className="inline-flex items-center gap-2 rounded-md border border-gray-400 hover:border-white py-1 px-3 font-semibold text-white hover:text-whiteText text-sm">
+              Select Category <FaChevronDown className="text-base mt-1" />
+            </MenuButton>
+            <Transition
+              enter="transition ease-out duration-75"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="transition ease-in duration-100"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <MenuItems
+                anchor="bottom end"
+                className="w-52 origin-top-right rounded-xl border border-white/5 bg-black p-1 text-sm/6 text-gray-300 focus:outline-none hover:text-white z-50"
+              >
+                {categories.map((item: CategoryProps) => (
+                  <MenuItem key={item?._id}>
+                    <Link
+                      to={`/category/${item?._base}`}
+                      className="flex w-full items-center gap-2 rounded-lg py-2 px-3 data-[focus]:bg-white/20 tracking-wide"
+                    >
+                      <img
+                        src={item?.image}
+                        alt="categoryImage"
+                        className="w-6 h-6 rounded-md"
+                      />
+                      {item?.name}
+                    </Link>
+                  </MenuItem>
+                ))}
+              </MenuItems>
+            </Transition>
+          </Menu>
+
+          {/* Navigation Links */}
+          <div className="flex gap-6 items-center">
             {navigationItems.map(({ title, link }) => (
               <Link
                 key={title}
                 to={link}
-                className="px-5 py-3 uppercase text-sm font-semibold relative group transition-colors duration-300"
+                className="uppercase text-sm font-semibold relative group transition-colors duration-300"
                 style={{ color: utsaColors.orange }}
               >
                 {title}
