@@ -18,13 +18,19 @@ const __dirname = path.dirname(__filename);
 
 const routesPath = path.resolve(__dirname, "./routes");
 const routeFiles = readdirSync(routesPath);
+
 routeFiles.map(async (file) => {
   const routeModule = await import(`./routes/${file}`);
-  app.use("/", routeModule.default);
+  const routePath = `/${file.replace(".mjs", "")}`;
+  app.use(routePath, routeModule.default);
 });
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+app.get("/questions-ui", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "questions.html"));
 });
 
 app.listen(port, () => {
