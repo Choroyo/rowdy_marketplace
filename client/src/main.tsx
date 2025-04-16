@@ -14,8 +14,13 @@ import Favorite from './pages/Favorite'
 import Orders from './pages/Orders'
 import Success from './pages/Success'
 import Cancel from './pages/Cancel'
+import Forum from './pages/Forum'
 import NotFound from './pages/NotFound'
-import { AuthProvider } from './context/AuthContext'  // Add this import
+import Login from './pages/Login'
+import { AuthProvider } from './context/AuthContext'
+import ProtectedRoute from './components/ProtectedRoute'
+import Registration from './ui/Registration'
+import CreateProduct from './pages/CreateProduct'
 
 const RouterLayout = () => {
   return (
@@ -35,6 +40,18 @@ const router = createBrowserRouter([
         element: <App />,
       },
       {
+        path: '/login',
+        element: <Login />,
+      },
+      {
+        path: '/register',
+        element: (
+          <div className="container mx-auto px-4 py-8">
+            <Registration />
+          </div>
+        ),
+      },
+      {
         path: '/product',
         element: <Product />,
       },
@@ -52,40 +69,78 @@ const router = createBrowserRouter([
       },
       {
         path: '/profile',
-        element: <Profile />,
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/create-product',
+        element: (
+          <ProtectedRoute>
+            <CreateProduct />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/cart',
-        element: <Cart />,
+        element: (
+          <ProtectedRoute>
+            <Cart />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/favorite',
-        element: <Favorite />,
+        element: (
+          <ProtectedRoute>
+            <Favorite />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/orders',
-        element: <Orders />,
+        element: (
+          <ProtectedRoute>
+            <Orders />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/success',
-        element: <Success />,
+        element: (
+          <ProtectedRoute>
+            <Success />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/cancel',
-        element: <Cancel />,
+        element: (
+          <ProtectedRoute>
+            <Cancel />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/forum',
+        element: (
+          <ProtectedRoute requireVerification={false}>
+            <Forum />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '*',
         element: <NotFound />,
-      },
+      }
     ]
   }
 ])
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
-  </StrictMode>
-)
+  <AuthProvider>
+    <RouterProvider router={router} />
+  </AuthProvider>
+);

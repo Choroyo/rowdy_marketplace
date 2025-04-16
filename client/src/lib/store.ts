@@ -35,6 +35,27 @@ interface StoreType {
   resetFavorite: () => void;
 }
 
+// Helper function to get the correct image path
+const getProductImagePath = (product: ProductProps): string | null => {
+  // First, try to use the first image from the images array (new approach)
+  if (product?.images && product.images.length > 0) {
+    return product.images[0];
+  }
+  
+  // Fallback for legacy products using name-based paths
+  if (product?.name) {
+    return `/images/products/${product.name}.webp`;
+  }
+  
+  // Last resort fallback using title
+  if (product?.title) {
+    return `/images/products/${product.title}.webp`;
+  }
+  
+  // No valid image path
+  return null;
+};
+
 const customStorage = {
   getItem: (name: string) => {
     const item = localStorage.getItem(name);
@@ -77,6 +98,12 @@ export const store = create<StoreType>()(
               (p) => p._id === product._id
             );
 
+            // Ensure product has the correct image path
+            const productWithImage = {
+              ...product,
+              mainImage: getProductImagePath(product) // Add mainImage for compatibility
+            };
+            
             if (existingProduct) {
               return {
                 cartProduct: state.cartProduct.map((p) =>
@@ -89,7 +116,7 @@ export const store = create<StoreType>()(
               return {
                 cartProduct: [
                   ...state.cartProduct,
-                  { ...product, quantity: 1 },
+                  { ...productWithImage, quantity: 1 },
                 ],
               };
             }
@@ -132,12 +159,19 @@ export const store = create<StoreType>()(
             const isFavorite = state.favoriteProduct.some(
               (item) => item._id === product._id
             );
+            
+            // Ensure product has the correct image path
+            const productWithImage = {
+              ...product,
+              mainImage: getProductImagePath(product) // Add mainImage for compatibility
+            };
+            
             return {
               favoriteProduct: isFavorite
                 ? state.favoriteProduct.filter(
                     (item) => item._id !== product._id
                   )
-                : [...state.favoriteProduct, { ...product }],
+                : [...state.favoriteProduct, { ...productWithImage, quantity: 1 }],
             };
           });
           resolve();

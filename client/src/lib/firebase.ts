@@ -3,39 +3,52 @@
 // Database Schema
 
 // ProductID
-// name (string):
-// price (number):
+// title (string): 
 // description (string): 
+// price (number):
 // images (array): 
-// category (string): 
-// createdBy (string): 
+// sellerId (string): 
+// status (string): available/sold
 // createdAt (timestamp): 
-// status (string): 
 
-// UserID
-// name (string): 
+// UserID (now using email as document ID)
+// firstName (string): 
+// lastName (string): 
 // email (string): 
-// role (string): 
+// role (string): user/seller/admin 
 // products (array): 
+// paymentDetails (object): 
+// ratings (array):
+// password (string): (Only for temporary implementation - REMOVE IN PRODUCTION)
+
+// TransactionID
+// productId (string):
+// buyerId (string):
+// sellerId (string):
+// price (number):
+// status (string): pending/completed/cancelled
+// createdAt (timestamp):
 
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import { getAuth } from 'firebase/auth';
 
+// TODO: Replace with your app's Firebase project configuration
+// Get these values from Firebase Console -> Project settings -> Your apps -> SDK setup and configuration
 const firebaseConfig = {
-  apiKey: "AIzaSvDnJ1J3PuK6AnY7rrSrtokx3nYfWDSLTZs",
+  apiKey: "AlzaSyDojJtJPuK6Anb7rrSrtokx3nyfWDsLIZs",
   authDomain: "rowdy-marketpla.firebaseapp.com",
   projectId: "rowdy-marketpla",
-  storageBucket: "rowdy-marketpla.firebasestorage.app",
+  storageBucket: "rowdy-marketpla.appspot.com",
   messagingSenderId: "1081743983370",
-  appId: "1:1081743983370:web:7478959d19c71df78af0f3",
-  measurementId: "G-D5LFX9X3R7"
+  appId: "1:1081743983370:web:7478959d19c71df78af0f3"
 };
+
+// Note: We are implementing a temporary custom authentication system using Firestore
+// directly for user storage and authentication instead of Firebase Auth
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
-const auth = getAuth(app);
 
-export { app, db, storage, auth };
+export { app, db, storage };

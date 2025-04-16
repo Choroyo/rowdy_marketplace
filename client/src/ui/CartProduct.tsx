@@ -1,80 +1,127 @@
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { IoClose } from "react-icons/io5";
 import { ProductProps } from "../../type";
 import FormattedPrice from "./FormattedPrice";
-import AddToCartBtn from "./AddToCartBtn";
-import { IoClose } from "react-icons/io5";
 import { store } from "../lib/store";
+import ProductDetailsModal from "./ProductDetailsModal";
 import toast from "react-hot-toast";
-import { FaCheck } from "react-icons/fa";
 
-const CartProduct = ({ product }: { product: ProductProps }) => {
+interface Props {
+  product: ProductProps;
+}
+
+const CartProduct = ({ product }: Props) => {
   const { removeFromCart } = store();
-  const handleRemoveProduct = () => {
+  const [imageError, setImageError] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+
+  // Function to get the image path with better fallback handling
+  const getImagePath = () => {
+    // First, try to use the first image from the images array (new approach)
+    if (product?.images && product.images.length > 0) {
+      return product.images[0];
+    }
+    
+    // Check for mainImage (set by our store helper)
+    if (product?.mainImage) {
+      return product.mainImage;
+    }
+    
+    // Fallback for legacy products using name-based paths
+    if (product?.name) {
+      return `/images/products/${product.name}.webp`;
+    }
+    
+    // Last resort fallback using title
+    if (product?.title) {
+      return `/images/products/${product.title}.webp`;
+    }
+    
+    // No valid image path
+    return null;
+  };
+
+  const imagePath = getImagePath();
+
+  // Handle clicking on the product to show details modal
+  const handleProductClick = (e: React.MouseEvent) => {
+    // Don't trigger if clicking on quantity buttons or delete button
+    if ((e.target as Element).closest('button')) {
+      return;
+    }
+    setShowDetailsModal(true);
+  };
+
+  const handleRemoveProduct = (e: React.MouseEvent) => {
+    // Prevent event bubbling
+    e.stopPropagation();
+    
     if (product) {
       removeFromCart(product?._id);
-      toast.success(`${product?.name.substring(0, 20)} deleted successfully!`);
+      toast.success(`${product?.name || product?.title || "Product"} removed from cart!`);
     }
   };
+
   return (
-    <div className="flex py-6 sm:py-10">
-      <Link to={`/product/${product?._id}`}>
-        <img
-          src={product?.images[0]}
-          alt="productImage"
-          className="h-24 w-24 rounded-md object-cover object-center sm:h-48 sm:w-48 border border-skyText/30 hover:border-skyText duration-300"
-        />
-      </Link>
-      <div className="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
-        <div className="relative pr-9 sm:grid sm:grid-cols-4 sm:gap-x-6 sm:pr-0">
-          <div className="flex flex-col gap-1 col-span-3">
-            <h3 className="text-base font-semibold w-full">
-              {product?.name.substring(0, 80)}
-            </h3>
-            <p className="text-xs">
-              Brand: <span className=" font-medium">{product?.brand}</span>
-            </p>
-            <p className="text-xs">
-              Category: <span className="font-medium">{product?.category}</span>
-            </p>
-            <div className="flex items-center gap-6 mt-2">
-              <p className="text-base font-semibold">
-                <FormattedPrice
-                  amount={product?.discountedPrice * product?.quantity}
-                />
+    <>
+      <div 
+        className="flex items-center py-5 sm:py-6 px-4 hover:bg-orange-50 border-b border-gray-200 transition-colors cursor-pointer rounded-lg mb-2 shadow-sm"
+        onClick={handleProductClick}
+      >
+        <div className="flex-shrink-0 h-24 w-24 sm:h-32 sm:w-32 bg-gray-100 rounded-md overflow-hidden border-2 border-[#0C2340]">
+          {!imageError && imagePath ? (
+            <img
+              src={imagePath}
+              alt={product.name || product.title || "Product image"}
+              className="h-full w-full object-cover object-center"
+              onError={(e) => setImageError(true)}
+            />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center bg-[#0C2340]/5">
+              <p className="text-[#0C2340] text-xs text-center px-2 font-medium">
+                {imageError ? "Image failed to load" : "No image available"}
               </p>
-              <AddToCartBtn product={product} showPrice={false} />
             </div>
-          </div>
-          <div className="mt-4 sm:mt-0 sm:pr-9">
-            <div className="absolute right-0 top-0">
-              <button
-                onClick={handleRemoveProduct}
-                className="-m2 inline-flex p-2 text-gray-600 hover:text-red-600"
-              >
-                <IoClose className="text-xl" />
-              </button>
-            </div>
-          </div>
-        </div>
-        <div>
-          {product?.isStock && (
-            <p className="mt-4 flex space-x-2 text-sm text-gray-700">
-              <FaCheck className="text-lg text-green-500" />{" "}
-              <span>In Stock</span>
-            </p>
           )}
-          <p>
-            You are saving{" "}
-            <span className="text-sm font-semibold text-green-500">
+        </div>
+
+        <div className="ml-4 flex-1 flex items-center">
+          {/* Category and name */}
+          <div className="flex-1">
+            {product.category && (
+              <p className="text-sm text-[#0C2340]/70 uppercase font-semibold tracking-wider">{product.category}</p>
+            )}
+            <h3 className="text-xl font-bold text-[#0C2340] mt-1">
+              {product.name || product.title || "Product"}
+            </h3>
+          </div>
+
+          {/* Price and delete button aligned right */}
+          <div className="flex items-center">
+            <p className="text-2xl font-bold text-[#F15A22] mr-4">
               <FormattedPrice
-                amount={product?.regularPrice - product?.discountedPrice}
+                amount={(product.discountedPrice || product.price) * (product.quantity || 1)}
               />
-            </span>{" "}
-            upon purchase
-          </p>
+            </p>
+            
+            <button
+              onClick={handleRemoveProduct}
+              className="p-2 text-gray-500 hover:text-[#F15A22] hover:bg-[#F15A22]/10 rounded-full transition-all"
+              aria-label="Remove from cart"
+            >
+              <IoClose className="text-2xl" />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Product Details Modal */}
+      <ProductDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        product={product}
+      />
+    </>
   );
 };
 

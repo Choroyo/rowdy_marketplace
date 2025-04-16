@@ -1,193 +1,162 @@
-import { useState } from "react";
-("./Login");
+// src/ui/Registration.tsx
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Label from "./Label";
-import { MdPhotoLibrary } from "react-icons/md";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../lib/firebase";
-import upload from "../lib/upload";
-import { doc, setDoc } from "firebase/firestore";
-import Login from "./Login";
+import { useAuth } from "../context/AuthContext";
+import Loading from "./Loading";
 
 const Registration = () => {
-  const [login, setLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState("");
-  const [avatar, setAvatar] = useState({
-    file: null,
-    url: "",
-  });
+  const [registrationAttempted, setRegistrationAttempted] = useState(false);
+  const navigate = useNavigate();
+  
+  const { user, signUp } = useAuth();
+  
+  // Add lifecycle logging
+  useEffect(() => {
+    console.log("[Registration] Component mounted/updated");
+    console.log("[Registration] Initial states:", { loading, registrationAttempted, user });
+    return () => console.log("[Registration] Component unmounted");
+  }, []);
 
-  const handleAvatar = (e: any) => {
-    if (e.target.files[0]) {
-      setAvatar({
-        file: e.target.files[0],
-        url: URL.createObjectURL(e.target.files[0]),
-      });
+  // Log state changes
+  useEffect(() => {
+    console.log("[Registration] Loading state changed:", { loading });
+  }, [loading]);
+
+  useEffect(() => {
+    console.log("[Registration] User state changed:", { user });
+    // If user becomes authenticated, redirect to profile
+    if (user) {
+      navigate('/profile');
     }
-  };
+  }, [user, navigate]);
+  
   const handleRegistration = async (e: any) => {
     e.preventDefault();
+    setErrMsg("");
+    
     const formData = new FormData(e.target);
-    const { firstName, lastName, email, password }: any =
-      Object.fromEntries(formData);
+    const formEntries = Object.fromEntries(formData);
+    const firstName = formEntries.firstName as string;
+    const lastName = formEntries.lastName as string;
+    const email = formEntries.email as string;
+    const password = formEntries.password as string;
+    
     try {
+      console.log("[Registration] Starting registration process...");
       setLoading(true);
-      const res = await createUserWithEmailAndPassword(auth, email, password);
-      let imageUrl = null;
-      if (avatar && avatar?.file) {
-        imageUrl = await upload(avatar?.file);
-      }
-      await setDoc(doc(db, "users", res.user.uid), {
-        firstName,
-        lastName,
-        email,
-        avatar: imageUrl,
-        id: res.user.uid,
-      });
-      setLogin(true);
+      setRegistrationAttempted(true);
+      console.log("[Registration] Form data:", { email, firstName, lastName });
+      
+      await signUp(email, password, firstName, lastName);
+      console.log("[Registration] Registration successful");
+      
+      // Auth state change will trigger redirect in useEffect
     } catch (error: any) {
-      let errorMessage;
-      switch (error.code) {
-        case "auth/invalid-email":
-          errorMessage = "Please enter a valid email.";
-          break;
-        case "auth/missing-password":
-          errorMessage = "Please enter a password.";
-          break;
-        case "auth/email-already-in-use":
-          errorMessage = "This email is already in use. Try another email.";
-          break;
-        // Add more cases as needed
-        default:
-          errorMessage = "An error occurred. Please try again.";
-      }
-      console.log("Error", error);
-      setErrMsg(errorMessage);
+      console.error("[Registration] Registration error:", error);
+      setErrMsg(error.message || "Registration failed. Please try again.");
     } finally {
+      console.log("[Registration] Setting loading state to false");
       setLoading(false);
     }
   };
+  
+  if (loading) {
+    console.log("[Registration] Rendering loading state");
+    return (
+      <div className="flex flex-col justify-center items-center min-h-[400px]">
+        <Loading />
+        <p className="text-white mt-4">Processing your registration...</p>
+      </div>
+    );
+  }
+  
+  console.log("[Registration] Rendering registration form");
   return (
-    <div>
-      {login ? (
-        <Login setLogin={setLogin} />
-      ) : (
-        <div className="bg-gray-950 rounded-lg">
-          <form
-            onSubmit={handleRegistration}
-            className="max-w-5xl mx-auto pt-10 px-10 lg:px-0 text-white"
-          >
-            <div className="border-b border-b-white/10 pb-5">
-              <h2 className="text-lg font-semibold uppercase leading-7">
-                Registration Form
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-gray-400">
-                You need to provide required information to get register with
-                us.
-              </p>
-            </div>
-            <div className="border-b border-b-white/10 pb-5">
-              <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-6">
-                <div className="sm:col-span-3">
-                  <Label title="First name" htmlFor="firstName" />
-                  <input
-                    type="text"
-                    name="firstName"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 px-4 outline-none text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-skyText sm:text-sm sm:leading-6 mt-2"
-                  />
-                </div>
-                <div className="sm:col-span-3">
-                  <Label title="Last name" htmlFor="lastName" />
-                  <input
-                    type="text"
-                    name="lastName"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 px-4 outline-none text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-skyText sm:text-sm sm:leading-6 mt-2"
-                  />
-                </div>
-                <div className="sm:col-span-4">
-                  <Label title="Email address" htmlFor="email" />
-                  <input
-                    type="email"
-                    name="email"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 px-4 outline-none text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-skyText sm:text-sm sm:leading-6 mt-2"
-                  />
-                </div>
-                <div className="sm:col-span-4">
-                  <Label title="Password" htmlFor="password" />
-                  <input
-                    type="password"
-                    name="password"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 px-4 outline-none text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-skyText sm:text-sm sm:leading-6 mt-2"
-                  />
-                </div>
-                <div className="col-span-full">
-                  <div className="mt-2 flex items-center gap-x-3">
-                    <div className="flex-1">
-                      <Label title="Cover photo" />
-                      <div className="mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-4">
-                        <div className="flex flex-col items-center text-center">
-                          <div className="w-14 h-14 border border-gray-600 rounded-full p-1">
-                            {avatar?.url ? (
-                              <img
-                                src={avatar?.url}
-                                alt="userImage"
-                                className="w-full h-full rounded-full object-cover"
-                              />
-                            ) : (
-                              <MdPhotoLibrary className="mx-auto h-full w-full text-gray-500" />
-                            )}
-                          </div>
-                          <div className="mt-4 flex items-center mb-1 text-sm leading-6 text-gray-400">
-                            <label htmlFor="file-upload">
-                              <span className="relative cursor-pointer rounded-md px-2 py-1 bg-gray-900 font-semibold text-gray-200 hover:bg-gray-800">
-                                Upload a file
-                              </span>
-                              <input
-                                type="file"
-                                name="file-upload"
-                                id="file-upload"
-                                className="sr-only"
-                                onChange={handleAvatar}
-                              />
-                            </label>
-                            <p className="pl-1">or drag and drop</p>
-                          </div>
-                          <p className="text-xs leading-5 text-gray-400">
-                            PNG, JPG, GIF up to 10MB
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {errMsg && (
-              <p className="bg-white/90 text-red-600 text-center py-1 rounded-md tracking-wide font-semibold">
-                {errMsg}
-              </p>
-            )}
-            <button
-              disabled={loading}
-              type="submit"
-              className={`mt-5 w-full py-2 uppercase text-base font-bold tracking-wide text-gray-300 rounded-md hover:text-white hover:bg-indigo-600 duration-200 ${
-                loading ? "bg-gray-500 hover:bg-gray-500" : "bg-indigo-700"
-              }`}
-            >
-              {loading ? "Loading..." : "Send"}
-            </button>
-          </form>
-          <p className="text-sm leading-6 text-gray-400 text-center -mt-2 py-10">
-            Already have an Account{" "}
-            <button
-              onClick={() => setLogin(true)}
-              className="text-gray-200 font-semibold underline underline-offset-2 decoration-[1px] hover:text-white duration-200"
-            >
-              Login
-            </button>
-          </p>
+    <div className="bg-utsaBlue/80 rounded-lg p-8 backdrop-blur-sm border border-utsaBlue/30">
+      <h2 className="text-2xl font-bold text-white mb-6">Create Account</h2>
+      
+      {errMsg && (
+        <div className="bg-red-900/50 text-red-200 p-4 rounded-md mb-6">
+          {errMsg}
         </div>
       )}
+      
+      <form onSubmit={handleRegistration} className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label title="First Name" htmlFor="firstName" />
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              required
+              className="w-full mt-2 px-3 py-2 bg-utsaBlue/50 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-skyText border border-white/10"
+              placeholder="Enter your first name"
+            />
+          </div>
+          
+          <div>
+            <Label title="Last Name" htmlFor="lastName" />
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              required
+              className="w-full mt-2 px-3 py-2 bg-utsaBlue/50 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-skyText border border-white/10"
+              placeholder="Enter your last name"
+            />
+          </div>
+        </div>
+        
+        <div>
+          <Label title="Email (use your @utsa email)" htmlFor="email" />
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            pattern="^[a-zA-Z0-9._%+-]+@(utsa\.edu|my\.utsa\.edu)$"
+            className="w-full mt-2 px-3 py-2 bg-utsaBlue/50 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-skyText border border-white/10"
+            placeholder="Enter your UTSA email address"
+          />
+        </div>
+        
+        <div>
+          <Label title="Password" htmlFor="password" />
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            className="w-full mt-2 px-3 py-2 bg-utsaBlue/50 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-skyText border border-white/10"
+            placeholder="Enter your password"
+            minLength={6}
+          />
+        </div>
+        
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-2 uppercase text-base font-bold tracking-wide text-white rounded-md hover:text-white hover:bg-utsaOrange/90 duration-200 ${
+            loading ? "bg-gray-500 hover:bg-gray-500" : "bg-utsaOrange"
+          }`}
+        >
+          {loading ? "Creating Account..." : "Create Account"}
+        </button>
+      </form>
+      
+      <p className="text-sm leading-6 text-gray-300 text-center mt-6">
+        Already have an Account?{" "}
+        <button
+          onClick={() => navigate("/login")}
+          className="text-gray-200 font-semibold underline underline-offset-2 decoration-[1px] hover:text-white duration-200"
+        >
+          Sign In
+        </button>
+      </p>
     </div>
   );
 };

@@ -1,21 +1,33 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useContext, ReactNode } from 'react';
-import { User } from 'firebase/auth';
-import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
+import { useFirestoreAuth } from '../hooks/useFirestoreAuth';
+
+// AuthContext interface for Firestore-based auth
+interface UserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  products: string[];
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: UserData | null;
   loading: boolean;
   error: string | null;
-  signUp: (email: string, password: string, name: string) => Promise<User>;
-  signIn: (email: string, password: string) => Promise<User>;
+  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<any>;
+  signIn: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
+  updateUserProfile: (data: Partial<UserData>) => Promise<void>;
+  addProductToUser: (productId: string) => Promise<void>;
+  isLoggedIn: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const auth = useFirebaseAuth();
+  const auth = useFirestoreAuth();
   
   return (
     <AuthContext.Provider value={auth}>

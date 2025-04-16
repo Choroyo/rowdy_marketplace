@@ -13,6 +13,8 @@ export default {
         greenText: "#1d8221",
         redText: "#E02B2B",
         skyText: "#32BDE8",
+        utsaBlue: "#0c2340",
+        utsaOrange: "#f15a22"
       },
 
       flex: {

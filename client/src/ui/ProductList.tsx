@@ -1,3 +1,4 @@
+// src/pages/ProductList.tsx
 import { Link } from "react-router-dom";
 import Container from "./Container";
 import Title from "./Title";

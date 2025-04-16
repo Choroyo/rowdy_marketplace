@@ -1,30 +1,24 @@
-// src/pages/Product.tsx
+// Updated Product.tsx with dual range filtering logic
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { config } from "../../config"; // This might not be needed anymore
+import { useParams, useSearchParams } from "react-router-dom";
 import { ProductProps } from "../../type";
 import { getData } from "../lib";
 import Loading from "../ui/Loading";
 import Container from "../ui/Container";
-import _, { divide } from "lodash";
-import PriceTag from "../ui/PriceTag";
-import { MdOutlineStarOutline } from "react-icons/md";
-import { FaRegEye } from "react-icons/fa";
-import FormattedPrice from "../ui/FormattedPrice";
-import { IoClose } from "react-icons/io5";
-import AddToCartBtn from "../ui/AddToCartBtn";
-import { productPayment } from "../assets";
+import _ from "lodash";
 import ProductCard from "../ui/ProductCard";
 import CategoryFilters from "../ui/CategoryFilters";
-import BannerCategories from "../ui/BannerCategories";
+import NoProductsFound from "../ui/NoProductsFound"; // You'll need to create this component
 
 const Product = () => {
   const [productData, setProductData] = useState<ProductProps | null>(null);
   const [allProducts, setAllProducts] = useState<ProductProps[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<ProductProps[]>([]);
   const [loading, setLoading] = useState(false);
   const [imgUrl, setImgUrl] = useState("");
   const [color, setColor] = useState("");
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
 
   // Simplified endpoint that works with our getData function
   const endpoint = id ? `/products/${id}` : `/products/`;
@@ -38,8 +32,10 @@ const Product = () => {
         if (id && data) {
           setProductData(data as ProductProps);
           setAllProducts([]);
+          setFilteredProducts([]);
         } else {
           setAllProducts(data as ProductProps[]);
+          setFilteredProducts(data as ProductProps[]); // Initially, filtered = all
           setProductData(null);
         }
       } catch (error) {
@@ -50,6 +46,27 @@ const Product = () => {
     };
     fetchData();
   }, [id, endpoint]);
+
+  // Apply filtering when searchParams or allProducts change
+  useEffect(() => {
+    if (allProducts.length > 0) {
+      const minPriceParam = searchParams.get('minPrice');
+      const maxPriceParam = searchParams.get('maxPrice');
+      
+      if (minPriceParam && maxPriceParam) {
+        const minPrice = parseInt(minPriceParam);
+        const maxPrice = parseInt(maxPriceParam);
+        
+        const filtered = allProducts.filter(product => 
+          product.price >= minPrice && product.price <= maxPrice
+        );
+        setFilteredProducts(filtered);
+      } else {
+        // If no price filter is applied, show all products
+        setFilteredProducts(allProducts);
+      }
+    }
+  }, [searchParams, allProducts]);
 
   useEffect(() => {
     if (productData && productData.images && productData.images.length > 0) {
@@ -62,7 +79,6 @@ const Product = () => {
 
   return (
     <>
-      <BannerCategories />
       <div>
         {loading ? (
           <Loading />
@@ -78,13 +94,21 @@ const Product = () => {
               // Product list view
               <div className="flex items-start gap-10">
                 <CategoryFilters id={id} />
-                <div>
-                  <p className="text-4xl font-semibold mb-5 text-center">Products</p>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                    {allProducts?.map((item: ProductProps) => (
-                      <ProductCard item={item} key={item?._id} />
-                    ))}
-                  </div>
+                <div className="flex-1">
+                  <p className="text-4xl font-semibold mb-5 text-center text-[#0c2340]">Products</p>
+                  
+                  {filteredProducts.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                      {filteredProducts.map((item: ProductProps) => (
+                        <ProductCard item={item} key={item?._id} />
+                      ))}
+                    </div>
+                  ) : (
+                    <NoProductsFound 
+                      minPrice={searchParams.get('minPrice')} 
+                      maxPrice={searchParams.get('maxPrice')} 
+                    />
+                  )}
                 </div>
               </div>
             )}

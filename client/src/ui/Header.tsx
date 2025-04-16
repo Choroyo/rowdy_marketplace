@@ -31,7 +31,7 @@ const navigationItems = [
   { title: "Cart", link: "/cart" },
   { title: "Orders", link: "/orders" },
   { title: "My Account", link: "/profile" },
-  { title: "Blog", link: "/blog" },
+  { title: "Forum", link: "/forum" },
 ];
 
 const Header = () => {
@@ -70,9 +70,11 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = products.filter((item) =>
-      item.name.toLowerCase().includes(searchText.toLowerCase())
-    );
+    const filtered = products.filter((item) => {
+      // Check both title and name fields, use title with priority
+      const productName = item.title || item.name || '';
+      return productName.toLowerCase().includes(searchText.toLowerCase());
+    });
     setFilteredProducts(filtered);
   }, [searchText, products]);
 

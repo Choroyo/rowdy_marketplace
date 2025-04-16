@@ -17,18 +17,19 @@ export interface CategoryProps {
 }
 
 export interface ProductProps {
-  _id: string;                 // Changed from number to string for Firestore document ID
-  name: string;
-  price: number;               // Added to match your Firebase schema
+  _id: string;                 // Firestore document ID
+  title: string;               // Changed from name to title
+  price: number;
   description: string;
-  images: string[];            // Changed from [string] to string[]
-  category: string;
-  createdBy: string;           // Added to match your Firebase schema
-  createdAt: any;              // Added for Firestore timestamp
-  status: string;              // Added to match your Firebase schema
+  images: string[];
+  sellerId: string;            // Changed from createdBy to sellerId
+  status: string;              // available/sold
+  createdAt: any;              // Firestore timestamp
   
-  // Existing properties from your interface
-  _base?: string;              // Made optional with ?
+  // Existing properties from the interface
+  name?: string;               // Maintaining backward compatibility
+  category?: string;
+  _base?: string;
   reviews?: number;
   rating?: number;
   quantity?: number;
@@ -37,8 +38,19 @@ export interface ProductProps {
   isNew?: boolean;
   discountedPrice?: number;
   regularPrice?: number;
-  colors?: string[];           // Changed from [string] to string[]
+  colors?: string[];
   brand?: string;
+  mainImage?: string;          // Added for compatibility with our image path helper
+}
+
+export interface TransactionProps {
+  _id: string;                 // Firestore document ID
+  productId: string;
+  buyerId: string;
+  sellerId: string;
+  price: number;
+  status: string;              // pending/completed/cancelled
+  createdAt: any;              // Firestore timestamp
 }
 
 export interface BlogProps {
@@ -56,6 +68,7 @@ export interface UserTypes {
     email: string;
     avatar: string;
     id: string;
+    role?: string;             // Added role
   };
 }
 
@@ -63,13 +76,34 @@ export interface FirebaseUserProps {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: string;                // user/seller/admin
   products: string[];          // Array of product IDs
+  paymentDetails?: {           // Added payment details for sellers
+    email?: string;
+    phone?: string;
+  };
+  ratings?: {                  // Added ratings
+    score: number;
+    comment: string;
+    fromUserId: string;
+    createdAt: any;
+  }[];
 }
 
 export interface OrderTypes {
-  orderItems: ProductProps[];  // Changed from [ProductProps] to ProductProps[]
+  orderItems: ProductProps[];
   paymentId: string;
   paymentMethod: string;
   userEmail: string;
+  status?: string;             // Added status
+}
+
+export interface NotificationProps {
+  _id: string;
+  userId: string;
+  type: string;                // purchase/sale/status-change/rating
+  message: string;
+  relatedId?: string;          // ID of related product/transaction/etc.
+  read: boolean;
+  createdAt: any;
 }
